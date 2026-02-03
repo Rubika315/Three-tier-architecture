@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud Task Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Times new roman", sans-serif;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(to right, #667eea, #764ba2);
+      padding: 18px;
+      color: white;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #444;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      height: 42px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      background: linear-gradient(to right, #43cea2, #185a9d);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #667eea;
+      color: white;
+      padding: 10px;
+    }
+
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f1f1f1;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    @media(max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+   Cloud Task Manager
+</header>
+
+<div class="container">
+
+  <!-- Form Card -->
+  <div class="card">
+    <h2>Create New Task</h2>
+
+    <div class="form-group">
+      <label>Task Title</label>
+      <input id="title" placeholder="Enter task title">
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="description" placeholder="Enter task description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Priority</label>
+      <select id="priority">
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Assigned To</label>
+      <input id="assigned_to" placeholder="Employee name">
+    </div>
+
+    <div class="form-group">
+      <label>Status</label>
+      <select id="status">
+        <option>Pending</option>
+        <option>In Progress</option>
+        <option>Completed</option>
+      </select>
+    </div>
+
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card">
+    <h2>Task Dashboard</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Priority</th>
+          <th>Assigned</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="taskTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  Built on AWS 3-Tier Architecture
+</footer>
+
+<script>
+const API_URL = "http://tasks-alb-532214453.ap-south-2.elb.amazonaws.com/tasks";   // Replace this
+
+function addTask() {
+  const task = {
+    title: document.getElementById("title").value,
+    description: document.getElementById("description").value,
+    priority: document.getElementById("priority").value,
+    assigned_to: document.getElementById("assigned_to").value,
+    status: document.getElementById("status").value
+  };
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(task)
+  }).then(() => {
+    loadTasks();
+    document.getElementById("title").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("assigned_to").value = "";
+  });
+}
+
+function loadTasks() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      const table = document.getElementById("taskTable");
+      table.innerHTML = "";
+
+      data.forEach(t => {
+        table.innerHTML += `
+          <tr>
+            <td>${t.id}</td>
+            <td>${t.title}</td>
+            <td>${t.priority}</td>
+            <td>${t.assigned_to}</td>
+            <td>${t.status}</td>
+          </tr>`;
+      });
+    });
+}
+
+loadTasks();
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
